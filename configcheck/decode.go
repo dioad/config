@@ -83,9 +83,9 @@ func Decode(input, out any) error {
 // It must not use errors.As on the whole tree, which would stop at the
 // first DecodeError.
 func collectFindings(err error, rootName string, findings *[]Finding) {
-	decodeErr, ok := err.(*mapstructure.DecodeError)
+	decodeErr, ok := err.(*mapstructure.DecodeError) //nolint:errorlint // walks the tree by hand; errors.As would stop at the first DecodeError
 	if !ok {
-		switch wrapped := err.(type) {
+		switch wrapped := err.(type) { //nolint:errorlint // inspects each node's own Unwrap, not the chain
 		case interface{ Unwrap() []error }:
 			for _, e := range wrapped.Unwrap() {
 				collectFindings(e, rootName, findings)

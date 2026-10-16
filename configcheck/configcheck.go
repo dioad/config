@@ -72,17 +72,6 @@ func NewCollector() *Collector {
 	return &Collector{list: &findingList{}}
 }
 
-func (c *Collector) shared() *findingList {
-	if c.list == nil {
-		c.list = &findingList{}
-	}
-	return c.list
-}
-
-func (c *Collector) derive(path string) *Collector {
-	return &Collector{path: path, list: c.shared()}
-}
-
 // Path returns the path findings added to c are reported under.
 func (c *Collector) Path() string {
 	return c.path
@@ -127,13 +116,6 @@ func (c *Collector) Add(err error) {
 	}
 }
 
-func (c *Collector) append(f Finding) {
-	l := c.shared()
-	l.mu.Lock()
-	defer l.mu.Unlock()
-	l.items = append(l.items, f)
-}
-
 // Findings returns every finding added through c or any collector sharing
 // its findings, in the order they were added.
 func (c *Collector) Findings() []Finding {
@@ -150,6 +132,24 @@ func (c *Collector) Err() error {
 		return nil
 	}
 	return &Error{Findings: findings}
+}
+
+func (c *Collector) shared() *findingList {
+	if c.list == nil {
+		c.list = &findingList{}
+	}
+	return c.list
+}
+
+func (c *Collector) derive(path string) *Collector {
+	return &Collector{path: path, list: c.shared()}
+}
+
+func (c *Collector) append(f Finding) {
+	l := c.shared()
+	l.mu.Lock()
+	defer l.mu.Unlock()
+	l.items = append(l.items, f)
 }
 
 // JoinPath joins a path and a path relative to it. A relative path that
