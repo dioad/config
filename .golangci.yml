@@ -1,0 +1,102 @@
+version: "2"
+
+linters:
+  default: all
+  disable:
+    # gomodguard is deprecated in favour of gomodguard_v2, which `default: all`
+    # already enables.
+    - gomodguard
+    - inamedparam
+    - gochecknoinits
+    - nlreturn
+    - wsl
+    - wsl_v5
+    - whitespace
+    - exhaustruct
+    - exhaustruct_v5
+    - err113
+    - testpackage
+    - paralleltest
+    - varnamelen
+    - forbidigo
+    - funlen
+    - gochecknoglobals
+    - godox
+    - lll
+    - mnd
+    - noinlineerr
+  settings:
+    ireturn:
+      allow:
+        - anon
+        - error
+        - empty
+        - stdlib
+        - generic
+        # mapstructure.DecodeHookFunc is mapstructure's own hook type; its
+        # decode APIs accept nothing narrower.
+        - \.DecodeHookFunc$
+    misspell:
+      # Deliberate misspelling used as an unknown-key fixture in
+      # configcheck/decode_test.go: the test asserts that a typo'd config
+      # key is reported, so the typo must survive the linter.
+      ignore-rules:
+        - nmae
+    # WARNING: do not add a `revive.rules` block to this settings section.
+    # Adding any entry under settings.revive.rules silently switches revive
+    # from its full default rule set to "only run the rules listed here".
+    # If revive rule-level configuration is ever needed, it requires
+    # `enable-all-rules: true` alongside `rules:`.
+    tagliatelle:
+      case:
+        rules:
+          json: snake
+          yaml: kebab
+          mapstructure: kebab
+        # If a squashed embed (`mapstructure:",squash"`) is ever flagged as a
+        # PascalCase key, add it to `ignored-fields`: squash has no key of
+        # its own, so that is a false positive.
+    depguard:
+      rules:
+        # math/rand is not cryptographically secure; test files are exempt.
+        crypto-rand:
+          list-mode: lax
+          files:
+            - '!**/*_test.go'
+          deny:
+            - pkg: math/rand$
+              desc: use crypto/rand for anything security-sensitive (tokens, secrets, nonces); math/rand is not cryptographically secure
+        # Guards against reintroducing superseded packages.
+        deprecated-stdlib:
+          list-mode: lax
+          deny:
+            - pkg: golang.org/x/net/context
+              desc: use the stdlib context package instead
+            - pkg: io/ioutil
+              desc: use io or os instead (ioutil is soft-deprecated since Go 1.16)
+  exclusions:
+    rules:
+      # Table-driven tests accumulate cognitive/nesting complexity from many
+      # small per-case closures; that is the idiomatic Go testing pattern.
+      - path: '_test\.go'
+        linters:
+          - cyclop
+          - gocognit
+          - gocyclo
+          - gosec
+          - maintidx
+          - nestif
+      # Repeated literals in tests are fixture/expectation data, not a shared
+      # constant that drifted.
+      - path: '_test\.go'
+        linters:
+          - goconst
+
+issues:
+  max-issues-per-linter: 0
+  max-same-issues: 0
+
+formatters:
+  enable:
+    - gofmt
+    - goimports
