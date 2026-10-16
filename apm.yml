@@ -1,0 +1,13 @@
+name: config
+version: 1.0.0
+description: APM project for config
+author: Pat Downey
+targets:
+- claude
+- copilot
+dependencies:
+  apm:
+  - dioad/agent-skills
+  mcp: []
+includes: auto
+scripts: {}

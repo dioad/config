@@ -39,3 +39,4 @@ apm_modules/
 .claude/
 .agents/
 .github/instructions/
+.github/prompts/
