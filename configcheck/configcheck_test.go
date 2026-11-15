@@ -58,6 +58,21 @@ func TestCollector_AddTurnsAPlainErrorIntoOneFinding(t *testing.T) {
 	}, c.Findings())
 }
 
+func TestCollector_InertReportsEachSettingAtThePath(t *testing.T) {
+	t.Parallel()
+
+	c := configcheck.NewCollector()
+	c.Inert()
+	assert.NoError(t, c.Err(), "no names adds nothing")
+
+	c.Field("management").Inert("allow-non-loopback (only applies with a listener)", "debug")
+
+	assert.Equal(t, []configcheck.Finding{
+		{Path: "management", Message: "allow-non-loopback (only applies with a listener) is set but has no effect, remove it"},
+		{Path: "management", Message: "debug is set but has no effect, remove it"},
+	}, c.Findings())
+}
+
 func TestCollector_ErrIsNilWithoutFindings(t *testing.T) {
 	t.Parallel()
 
