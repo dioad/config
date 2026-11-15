@@ -99,6 +99,17 @@ func (c *Collector) Errorf(format string, args ...any) {
 	c.append(Finding{Path: c.path, Message: fmt.Sprintf(format, args...)})
 }
 
+// Inert adds a finding at c's path for each of names: a setting that is
+// populated but has no effect in this configuration. A setting that silently
+// does nothing leaves an operator believing it applies, so a command rejects
+// it rather than warning. Each name may carry a short reason in parentheses.
+// No names adds nothing.
+func (c *Collector) Inert(names ...string) {
+	for _, name := range names {
+		c.Errorf("%s is set but has no effect, remove it", name)
+	}
+}
+
 // Add adds err to c. An *Error, such as one returned by Decode, contributes
 // each of its findings with c's path prefixed; any other error becomes one
 // finding at c's path. A nil err adds nothing.
