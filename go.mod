@@ -9,7 +9,7 @@ require (
 )
 
 require (
-	github.com/dioad/generics v0.0.8 // indirect
+	github.com/dioad/generics v0.0.9 // indirect
 	github.com/kr/pretty v0.3.1 // indirect
 	github.com/mitchellh/go-homedir v1.1.0 // indirect
 	github.com/rogpeppe/go-internal v1.16.0 // indirect
